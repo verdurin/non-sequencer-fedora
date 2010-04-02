@@ -2,7 +2,7 @@
 %global git ba94d2c354145
 Name:		non-sequencer
 Version:	1.9.3
-Release:	3.%{snapshot}git%{git}%{?dist}
+Release:	4.%{snapshot}git%{git}%{?dist}
 Summary:	A powerful, real-time, pattern-based MIDI sequencer	
 
 Group:		Applications/Multimedia
@@ -29,24 +29,6 @@ solutions, it is a composition tool-one that transforms MIDI
 music-making on Linux from a complex nightmare into a pleasurable,
 efficient, and streamlined process.
 
-%package doc
-
-Summary: Non-sequencer documentation
-
-Group:	Documentation
-
-%description doc
-
-The Non Sequencer is a powerful real-time, pattern-based MIDI
-sequencer for Linux-released under the GPL. Filling the void left by
-countless DAWs, piano-roll editors, and other purely performance based
-solutions, it is a composition tool-one that transforms MIDI
-music-making on Linux from a complex nightmare into a pleasurable,
-efficient, and streamlined process.
-
-This package contains documentation.
-
-
 %prep
 %setup -q -n sequencer
 
@@ -55,12 +37,13 @@ sed -i '/^ifneq (\$(USE_DEBUG),yes)/,+4 d' Makefile
 %build
 %configure --enable-lash
  
-make VERBOSE=1 %{?_smp_mflags}
+make VERBOSE=1 SYSTEM_PATH=%{_datadir} DOCUMENT_PATH=%{_defaultdocdir}/%{name}-%{version}/doc/ %{?_smp_mflags}  
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install DESTDIR=$RPM_BUILD_ROOT DOCUMENT_PATH=%{_defaultdocdir}/%{name}-%{version}
+sed -i "/\.html/d" Makefile
+make install DESTDIR=$RPM_BUILD_ROOT
 
 
 %clean
@@ -71,12 +54,15 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %{_bindir}/non-sequencer
 %{_datadir}/%{name}/instruments/*
+%doc COPYING doc/
 
-%files doc
-%defattr(-,root,root,-)
-%doc doc
+
 
 %changelog
+* Fri Apr  2 2010 Adam Huffman <bloch@verdurin.com> - 1.9.3-4.20100131git%{git}%{?dist}
+- move docs back to main package
+- fix build and install to ensure docs available at runtime
+
 * Tue Mar 30 2010 Adam Huffman <bloch@verdurin.com> - 1.9.3-3.20100131gitba94d2c354145
 - fix doc duplication
 
