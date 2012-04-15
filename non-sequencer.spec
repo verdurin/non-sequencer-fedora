@@ -1,8 +1,8 @@
-%global snapshot 20100131
-%global git ba94d2c354145
+%global snapshot 20120415
+%global git 3a7d924
 Name:		non-sequencer
-Version:	1.9.3
-Release:	4.%{snapshot}git%{git}%{?dist}
+Version:	1.9.4
+Release:	1.%{snapshot}git%{git}%{?dist}
 Summary:	A powerful, real-time, pattern-based MIDI sequencer	
 
 Group:		Applications/Multimedia
@@ -11,14 +11,23 @@ URL:		http://non-sequencer.tuxfamily.org/
 # The source for this package was pulled from upstream's VCS  Use the
 # following commands to generate the tarball:
 # git clone git://git.tuxfamily.org/gitroot/non/sequencer.git
-# tar cjvf non-sequencer-20100131gitba94d2c354145.tar.bz2 sequencer/
-Source0:	non-sequencer-20100131gitba94d2c354145.tar.bz2
+# cd sequencer
+# git checkout 3a7d924
+# tar cjvf non-sequencer-20120415git3a7d924.tar.bz2 sequencer/ --exclude=.git*
+Source0:	non-sequencer-%{snapshot}git%{git}.tar.bz2
 BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires:	fltk-devel fltk-fluid
+BuildRequires:	fltk-devel 
+BuildRequires:	fltk-fluid
 BuildRequires:	jack-audio-connection-kit-devel
 BuildRequires:	libsigc++20-devel 
-BuildRequires:	cmake lash-devel git libpng-devel libjpeg-devel
+#BuildRequires:	cmake 
+#BuildRequires:	lash-devel 
+#BuildRequires:	git 
+BuildRequires:	libpng-devel 
+BuildRequires:	libjpeg-devel
+BuildRequires:	liblo-devel
+BuildRequires:	libXpm-devel
 
 %description
 
@@ -35,30 +44,42 @@ efficient, and streamlined process.
 sed -i '/^ifneq (\$(USE_DEBUG),yes)/,+4 d' Makefile
 
 %build
-%configure --enable-lash
+%configure
  
 make VERBOSE=1 SYSTEM_PATH=%{_datadir} DOCUMENT_PATH=%{_defaultdocdir}/%{name}-%{version}/doc/ %{?_smp_mflags}  
 
 
 %install
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 sed -i "/\.html/d" Makefile
-make install DESTDIR=$RPM_BUILD_ROOT
+make install DESTDIR=%{buildroot}
 
 
 %clean
-rm -rf $RPM_BUILD_ROOT
+rm -rf %{buildroot}
 
 
 %files
 %defattr(-,root,root,-)
 %{_bindir}/non-sequencer
+%dir %{_datadir}/%{name}
 %{_datadir}/%{name}/instruments/*
+%{_datadir}/applications/%{name}.desktop
+#TODO: clean up all the different generated icon versions?
+%{_datadir}/icons/hicolor/*
+%{_datadir}/pixmaps/%{name}/icon-256x256.png
+
 %doc COPYING doc/
 
 
 
 %changelog
+* Sun Apr 15 2012 Adam Huffman <verdurin@fedoraproject.org> - 1.9.4-1.20120415git%{git}%{?dist}
+- update to new upstream release 1.9.4
+- add missing icon entries to files
+- add BR for liblo and libXpm
+- remove LASH BR and configure entry, following removal upstream
+
 * Fri Apr  2 2010 Adam Huffman <bloch@verdurin.com> - 1.9.3-4.20100131git%{git}%{?dist}
 - move docs back to main package
 - fix build and install to ensure docs available at runtime
